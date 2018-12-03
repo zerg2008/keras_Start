@@ -1,9 +1,45 @@
 from keras.models import Sequential
 from keras.layers import Dense, Activation
+from keras.callbacks import TensorBoard
 
+#定义一个模型
+# Keras有两种类型的模型，序贯模型（Sequential）和函数式模型
+# 比较常用的是Sequential，它是单输入单输出的
 model = Sequential()
+
+# Dense（units, activation=’relu’, use_bias=True）
+#
+# 参数说明：
+#
+# units: 全连接层输出的维度，即下一层神经元的个数。
+#
+# activation：激活函数，默认使用Relu。
+#
+# use_bias：是否使用bias偏置项。
+
+# 通过add()方法一层层添加模型
+# Dense是全连接层，第一层需要定义输入，
+# 第二层无需指定输入，一般第二层把第一层的输出作为输入
 model.add(Dense(32, activation='relu', input_dim=100))
+# 模型中添加一个全连接层，该层的深度为32,激活函数认为“relu”
+# input_dim=100，说明输入是一个100维的向量，这相当于一个一阶的张量，它的shape就是(100,)
+# 输入参数为100维，输出的张量结构为n×100×32
 model.add(Dense(1, activation='sigmoid'))
+# 模型中添加一个全连接层，该层的深度为1,激活函数为“sigmoid”
+# sigmoid函数也叫 Logistic 函数，用于隐层神经元输出，取值范围为(0,1)，
+# 它可以将一个实数映射到(0,1)的区间，可以用来做二分类。
+# 在特征相差比较复杂或是相差不是特别大时效果比较好。
+# 输出维度为1
+
+# compile(optimizer, loss, metrics=None)
+#
+# 参数说明：
+#
+# optimizer：优化器，如：’SGD‘，’Adam‘等。
+#
+# loss：定义模型的损失函数，如：’mse’，’mae‘等。
+#
+# metric：模型的评价指标，如：’accuracy‘等。
 
 model.compile(optimizer='rmsprop',
               loss='binary_crossentropy',
@@ -11,9 +47,37 @@ model.compile(optimizer='rmsprop',
 
 # 生成虚拟数据
 import numpy as np
-data = np.random.random((1000, 100))
+data = np.random.random((10000, 100))
 
-labels = np.random.randint(2, size=(1000, 1))
+# 该函数产生1000个一维向量，向量的每一个值都是不大于零的整数，也就是0或者1
+labels = np.random.randint(2, size=(10000, 1))
 
+x_test = np.random.random((100, 100))
+y_test = np.random.randint(2, size=(100, 1))
+
+# fit(x=None, y=None, batch_size=None, epochs=1, verbose=1, validation_split=0.0)
+#
+# 参数说明：
+#
+# x：输入数据。
+#
+# y：标签。
+#
+# batch_size：梯度下降时每个batch包含的样本数。
+#
+# epochs：整数，所有样本的训练次数。
+#
+# verbose：日志显示，0为不显示，1为显示进度条记录，2为每个epochs输出一行记录。
+#
+# validation_split：0-1的浮点数，切割输入数据的一定比例作为验证集。
+#
+# callbacks=[TensorBoard(log_dir='mytensorboard/3')]调用tensorBoard显示训练结果
 # 训练模型，以 32 个样本为一个 batch 进行迭代
-model.fit(data, labels, epochs=10, batch_size=32)
+model.fit(data, labels, epochs=10, batch_size=32,callbacks=[TensorBoard(log_dir='./log')])
+
+# 评价训练出的网络
+loss, accuracy = model.evaluate(x_test, y_test, batch_size=10)
+
+print('test loss: ', loss)
+print('test accuracy: ', accuracy)
+
